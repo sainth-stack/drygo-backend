@@ -5,7 +5,8 @@ const cors = require("cors");
 const productRoutes = require("./routes/productRoutes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
-const authRoutes = require("./routes/AuthRoutes")
+const authRoutes = require("./routes/AuthRoutes");
+const  contactRoutes = require("./routes/contactRoutes");
 
 
 
@@ -92,6 +93,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/contact", contactRoutes);
 
 app.use("/home", (req, res) => {
   res.send("<h1>Welcome to DryGo</h1>");
