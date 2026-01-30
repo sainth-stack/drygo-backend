@@ -9,6 +9,9 @@ router.post("/", authenticate, controller.createOrder);
 // GET ORDER BY ID - Must come before /:orderNumber route
 router.get("/id/:orderId", controller.getOrderById);
 
+// GET ALL ORDERS BY USER ID - Requires authentication (user's own orders only)
+router.get("/user/:userId", authenticate, controller.getOrdersByUserId);
+
 // GET ORDERS BY EMAIL OR ORDER BY ORDER NUMBER
 // GET /api/orders?email=... - Get orders by email
 // GET /api/orders/:orderNumber - Get order by order number

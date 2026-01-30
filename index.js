@@ -6,7 +6,8 @@ const productRoutes = require("./routes/productRoutes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const authRoutes = require("./routes/AuthRoutes");
-const  contactRoutes = require("./routes/contactRoutes");
+const contactRoutes = require("./routes/contactRoutes");
+const couponRoutes = require("./routes/couponRoutes");
 
 
 
@@ -94,6 +95,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/coupon", couponRoutes);
 
 app.use("/home", (req, res) => {
   res.send("<h1>Welcome to DryGo</h1>");

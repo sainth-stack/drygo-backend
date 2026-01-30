@@ -1,6 +1,7 @@
 const Order = require("../models/OrderModel");
 const Product = require("../models/productModels/ProductModel");
 const Cart = require("../models/CartModel");
+const { applyCouponToOrder } = require("./couponController");
 
 /**
  * Helper → Generate unique order number
@@ -143,8 +144,33 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // Calculate totals (coupon discount can be calculated here if needed)
-    const discount = 0; // Placeholder for coupon discount calculation
+    // Calculate subtotal first (before discount)
+    const subtotal = orderItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    // Validate and apply coupon if provided
+    let discount = 0;
+    let appliedCouponCode = null;
+    
+    if (couponCode) {
+      const couponResult = await applyCouponToOrder(couponCode, subtotal, userId);
+      
+      if (!couponResult.valid && couponResult.error) {
+        return res.status(400).json({
+          success: false,
+          message: `Coupon error: ${couponResult.error}`
+        });
+      }
+      
+      if (couponResult.valid) {
+        discount = couponResult.discount;
+        appliedCouponCode = couponCode.toUpperCase().trim();
+      }
+    }
+
+    // Calculate totals with discount
     const totals = calculateTotals(orderItems, discount);
 
     // Generate order number
@@ -175,7 +201,7 @@ exports.createOrder = async (req, res) => {
         country: shippingAddress.country || "India"
       },
       items: orderItems,
-      couponCode: couponCode || null,
+      couponCode: appliedCouponCode,
       paymentMethod,
       orderStatus: "pending",
       deliveryEstimate: deliveryEstimateStr,
@@ -205,6 +231,43 @@ exports.createOrder = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Failed to create order"
+    });
+  }
+};
+
+// GET ALL ORDERS BY USER ID (authenticated user's orders)
+exports.getOrdersByUserId = async (req, res) => {
+  try {
+    const authUserId = req.userId; // From authentication middleware
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required"
+      });
+    }
+
+    // Users can only fetch their own orders
+    if (authUserId.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only view your own orders"
+      });
+    }
+
+    const orders = await Order.find({ userId: authUserId })
+      .populate('items.productId', 'name price image')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: orders.map(order => formatOrderResponse(order))
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch orders"
     });
   }
 };
