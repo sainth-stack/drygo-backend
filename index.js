@@ -5,7 +5,6 @@ const {
   TWILIO_ACCOUNT_SID,
   TWILIO_AUTH_TOKEN
 } = require("./env");
-
 const mongoose = require("mongoose");
 const cors = require("cors");
 const productRoutes = require("./routes/productRoutes/productRoutes");
@@ -14,8 +13,6 @@ const orderRoutes = require("./routes/orderRoutes");
 const authRoutes = require("./routes/AuthRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const couponRoutes = require("./routes/couponRoutes");
-
-
 
 const app = express();
 
