@@ -18,10 +18,7 @@ const app = express();
 
 // Middleware
 // CORS configuration - allow requests from frontend
-app.use(cors({
-  origin: "http://localhost:8080",
-  credentials: true
-}));
+app.use(cors());
 
 // JSON parser with error handling for empty bodies
 const jsonParser = express.json();
