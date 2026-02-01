@@ -1,5 +1,5 @@
 const express = require("express");
-const dotEnv = require("dotenv");
+const { DATABASE_URL, PORT } = require("./env");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const productRoutes = require("./routes/productRoutes/productRoutes");
@@ -11,10 +11,7 @@ const couponRoutes = require("./routes/couponRoutes");
 
 
 
-// Load env
-dotEnv.config();
 const app = express();
-const PORT = 4000;
 
 
 
@@ -58,7 +55,7 @@ app.use((req, res, next) => {
 
 // MongoDB Connection with better error handling
 mongoose
-  .connect(process.env.MONGO_URL)
+  .connect(DATABASE_URL)
   .then(() => {
     console.log("✅ MongoDB connected successfully");
     console.log("Database:", mongoose.connection.name);

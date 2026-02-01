@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { SECRET_KEY } = require("../env");
 
 /**
  * Authentication Middleware
@@ -17,7 +18,7 @@ const authenticate = (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, SECRET_KEY);
     
     // Attach userId to request
     req.userId = decoded.userId;
