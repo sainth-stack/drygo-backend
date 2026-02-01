@@ -1,10 +1,7 @@
+const path = require("path");
+const dotenv = require("dotenv");
 const express = require("express");
-const {
-  DATABASE_URL,
-  PORT,
-  TWILIO_ACCOUNT_SID,
-  TWILIO_AUTH_TOKEN
-} = require("./env");
+dotenv.config({ path: path.join(__dirname, ".env") });
 const mongoose = require("mongoose");
 const cors = require("cors");
 const productRoutes = require("./routes/productRoutes/productRoutes");
@@ -58,7 +55,7 @@ app.use((req, res, next) => {
 
 // MongoDB Connection with better error handling
 mongoose
-  .connect(DATABASE_URL)
+  .connect(process.env.DATABASE_URL)
   .then(() => {
     console.log("✅ MongoDB connected successfully");
     console.log("Database:", mongoose.connection.name);
@@ -121,27 +118,27 @@ app.get("/api/health", (req, res) => {
 
 // WhatsApp config check (for debugging - no secrets exposed)
 app.get("/api/whatsapp-status", (req, res) => {
-  const sid = TWILIO_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID;
-  const token = TWILIO_AUTH_TOKEN || process.env.TWILIO_AUTH_TOKEN;
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
   res.json({
     configured: !!(sid && token),
     hasSid: !!sid,
     hasToken: !!token,
     hint: !(sid && token)
-      ? "Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to env.js"
+      ? "Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to .env"
       : "Ready"
   });
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server started and running on port ${PORT}`);
+app.listen(process.env.PORT || 5000, () => {
+  console.log(`🚀 Server started and running on port ${process.env.PORT || 5000}`);
   const hasTwilio = !!(
-    (TWILIO_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID) &&
-    (TWILIO_AUTH_TOKEN || process.env.TWILIO_AUTH_TOKEN)
+    process.env.TWILIO_ACCOUNT_SID &&
+    process.env.TWILIO_AUTH_TOKEN
   );
   if (!hasTwilio) {
-    console.log("⚠️  WhatsApp disabled: Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to env.js");
+    console.log("⚠️  WhatsApp disabled: Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to .env");
   } else {
     console.log("✅ WhatsApp order notifications enabled");
   }

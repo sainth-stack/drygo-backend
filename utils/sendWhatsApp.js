@@ -1,17 +1,11 @@
 const twilio = require("twilio");
-const {
-  TWILIO_ACCOUNT_SID,
-  TWILIO_AUTH_TOKEN,
-  TWILIO_WHATSAPP_FROM,
-  BUSINESS_WHATSAPP_NUMBER
-} = require("../env");
 
 let _client = null;
 
 function getTwilioClient() {
   if (_client) return _client;
-  const sid = TWILIO_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID;
-  const token = TWILIO_AUTH_TOKEN || process.env.TWILIO_AUTH_TOKEN;
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
   if (sid && token) {
     _client = twilio(sid, token);
   }
@@ -56,21 +50,17 @@ const sendOrderWhatsApp = async (order) => {
   const client = getTwilioClient();
   if (!client) {
     console.warn(
-      "⚠️  WhatsApp skipped: Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to env.js"
+      "⚠️  WhatsApp skipped: Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to .env"
     );
     return null;
   }
 
   const orderObj = order.toObject ? order.toObject() : order;
   const businessNumber =
-    (BUSINESS_WHATSAPP_NUMBER ||
-      process.env.BUSINESS_WHATSAPP_NUMBER ||
-      "+916362185820").replace(/\s/g, "") ||
+    (process.env.BUSINESS_WHATSAPP_NUMBER || "+916362185820").replace(/\s/g, "") ||
     "+916362185820";
   const fromNumber =
-    TWILIO_WHATSAPP_FROM ||
-    process.env.TWILIO_WHATSAPP_FROM ||
-    "whatsapp:+14155238886";
+    process.env.TWILIO_WHATSAPP_FROM || "whatsapp:+14155238886";
 
   const addr = formatAddress(orderObj.shippingAddress);
   const itemsText = formatOrderItems(orderObj.items);
