@@ -1,5 +1,11 @@
 const express = require("express");
-const { DATABASE_URL, PORT } = require("./env");
+const {
+  DATABASE_URL,
+  PORT,
+  TWILIO_ACCOUNT_SID,
+  TWILIO_AUTH_TOKEN
+} = require("./env");
+
 const mongoose = require("mongoose");
 const cors = require("cors");
 const productRoutes = require("./routes/productRoutes/productRoutes");
@@ -116,7 +122,30 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// WhatsApp config check (for debugging - no secrets exposed)
+app.get("/api/whatsapp-status", (req, res) => {
+  const sid = TWILIO_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID;
+  const token = TWILIO_AUTH_TOKEN || process.env.TWILIO_AUTH_TOKEN;
+  res.json({
+    configured: !!(sid && token),
+    hasSid: !!sid,
+    hasToken: !!token,
+    hint: !(sid && token)
+      ? "Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to env.js"
+      : "Ready"
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server started and running on port ${PORT}`);
+  const hasTwilio = !!(
+    (TWILIO_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID) &&
+    (TWILIO_AUTH_TOKEN || process.env.TWILIO_AUTH_TOKEN)
+  );
+  if (!hasTwilio) {
+    console.log("⚠️  WhatsApp disabled: Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to env.js");
+  } else {
+    console.log("✅ WhatsApp order notifications enabled");
+  }
 });
