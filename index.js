@@ -1,5 +1,14 @@
-const express = require("express");
+const path = require("path");
 const dotEnv = require("dotenv");
+
+const envResult = dotEnv.config({ path: path.join(__dirname, ".env") });
+if (envResult.error) {
+  console.warn("⚠️  .env file not found at:", path.join(__dirname, ".env"));
+} else if (envResult.parsed) {
+  console.log("✅ .env loaded");
+}
+
+const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const productRoutes = require("./routes/productRoutes/productRoutes");
@@ -9,10 +18,6 @@ const authRoutes = require("./routes/AuthRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const couponRoutes = require("./routes/couponRoutes");
 
-
-
-// Load env
-dotEnv.config();
 const app = express();
 const PORT = 4000;
 
@@ -119,7 +124,29 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// WhatsApp config check (for debugging - no secrets exposed)
+app.get("/api/whatsapp-status", (req, res) => {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  res.json({
+    configured: !!(sid && token),
+    hasSid: !!sid,
+    hasToken: !!token,
+    envPath: path.join(__dirname, ".env"),
+    hint: !(sid && token)
+      ? "Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to .env file"
+      : "Ready"
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server started and running on port ${PORT}`);
+  const hasTwilio = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN;
+  if (!hasTwilio) {
+    console.log("⚠️  WhatsApp disabled: Add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to your .env file");
+    console.log("   File location: " + path.join(__dirname, ".env"));
+  } else {
+    console.log("✅ WhatsApp order notifications enabled");
+  }
 });

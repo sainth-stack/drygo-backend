@@ -2,6 +2,7 @@ const Order = require("../models/OrderModel");
 const Product = require("../models/productModels/ProductModel");
 const Cart = require("../models/CartModel");
 const { applyCouponToOrder } = require("./couponController");
+const { sendOrderWhatsApp } = require("../utils/sendWhatsApp");
 
 /**
  * Helper → Generate unique order number
@@ -214,6 +215,11 @@ exports.createOrder = async (req, res) => {
 
     // Populate product details
     await order.populate('items.productId', 'name price image');
+
+    // Send order details to business WhatsApp (non-blocking)
+    sendOrderWhatsApp(order).catch((err) =>
+      console.error("WhatsApp notification error:", err.message)
+    );
 
     res.status(201).json({
       success: true,
